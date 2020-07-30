@@ -54,7 +54,6 @@ void OnConnect()
 	info += " socket: ";
 	info += std::to_string(client_socket);
 	InfoLog(info);
-	connect_set.insert(client_socket);
 
 	// 通知所有在线用户
 	for (auto sock: connect_set)
@@ -66,6 +65,7 @@ void OnConnect()
 			send(sock, (char*)&response, sizeof(SC_NewClient), 0);
 		}
 	}
+	connect_set.insert(client_socket);
 }
 
 // 客户端断开连接
@@ -75,7 +75,6 @@ void OnDisconnect(SOCKET cli_socket)
 	{
 		return;
 	}
-
 	connect_set.erase(cli_socket);
 
 	string info = "客户端断开连接: socket:";
@@ -99,12 +98,7 @@ void OnRecvMessage(SOCKET cli_socket)
 {
 	char buf[1024];
 	int len = recv(cli_socket, buf, sizeof(ProtoHead), 0);
-	if (len < 0)
-	{
-		ErrorLog("接收消息错误");
-		return;
-	}
-	if (len == 0)
+	if (len <= 0)
 	{
 		OnDisconnect(cli_socket);
 		return;
@@ -178,18 +172,23 @@ int main()
 			ErrorLog("select error");
 			return 0;
 		}
+		if (read_fd.fd_count == 0)
+		{
+			InfoLog("ping");
+			continue;
+		}
 		
 		for (size_t i  = 0; i < read_fd.fd_count; i++)
 		{
 			if (read_fd.fd_array[i] == _sock)
 			{
 				OnConnect();
+				continue;
 			}
 
 			// 消息
+			OnRecvMessage(read_fd.fd_array[i]);
 		}
-
-		InfoLog("ping");
 	}
 
 	closesocket(_sock);
