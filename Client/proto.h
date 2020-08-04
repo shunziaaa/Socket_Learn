@@ -27,6 +27,7 @@ struct SC_Disconnect :public ProtoHead
 	{
 		cmd_id = cmd_sc_disconnect_clinet;
 		length = sizeof(SC_Disconnect);
+		sock = 0;
 	}
 
 	int sock;
@@ -50,6 +51,7 @@ struct SC_Login :public ProtoHead
 	{
 		cmd_id = cmd_sc_login;
 		length = sizeof(SC_Login);
+		result = 0;
 	}
 
 	int result;

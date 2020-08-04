@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 #include "cmd_id.h"
+#include <iostream>
+using std::cout;
+using std::endl;
 using std::string;
 struct ProtoHead
 {
